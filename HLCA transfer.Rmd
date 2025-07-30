@@ -1,0 +1,88 @@
+---
+title: An R Markdown document converted from "G:/Marvin datasets/Bonn/HLCA transfer.ipynb"
+output: html_document
+---
+
+```{r}
+# Load packages
+library(Seurat)
+library(ggplot2)
+library(pheatmap)
+library(RColorBrewer)
+```
+
+```{r}
+# Read transferred labels
+data<-read.csv('filename_raw_obs.csv')
+head(data)
+```
+
+```{r}
+# Load data
+load('/home/theo/R/Bonn/Parenchyma_analysis_TK_env.RData')
+```
+
+```{r}
+# Save labels in the seurat object
+combined_list$hlca<-data$Level_4_transfered_label[match(rownames(combined_list@meta.data), data$X)]
+table(combined_list$hlca)[table(combined_list$hlca)>=10]
+```
+
+```{r}
+# Visualise UMAP with mapped transferred labels
+combined_list$hlca<-factor(combined_list$hlca, levels=unique(combined_list$hlca))
+
+options(repr.plot.width=10, repr.plot.height=7)
+
+pdf("rplot.pdf", width=10, height=7) 
+
+DimPlot(combined_list, group.by='hlca', label=T) +
+scale_color_manual(values=c("#BCBD22","#2A7FB7","grey80","#569EA4","#BCBD22","#FFC156","#569EA4","#FFC156","#BD0A36","#FFB579",
+                            "#BD0A36","#2A7FB7","#2A7FB7","#569EA4","#865FAB","#569EA4","#865FAB","#569EA4","#B15928","#FFB6B0",
+                            "#FFB6B0","darkolivegreen4","#569EA4","#569EA4","#B89B74","#69B764","#69B764","#FFB579","indianred1",
+                            "#FFB6B0","mediumvioletred","mediumvioletred","#569EA4","#FFB579","darkolivegreen4","#FFB579","indianred1",
+                            "#569EA4","darkolivegreen4")) +          
+theme(legend.position="none")
+
+dev.off()
+```
+
+```{r}
+save_pheatmap_pdf <- function(x, filename, width=7, height=7) {
+    stopifnot(!missing(x))
+    stopifnot(!missing(filename))
+    pdf(filename, width=width, height=height)
+    grid::grid.newpage()
+    grid::grid.draw(x$gtable)
+    dev.off()
+}
+```
+
+```{r}
+# Create confusion plot
+df<-table(combined_list$hlca, combined_list$general_final_annotation)
+df<-df[,-27]
+df<-round(prop.table(df, margin=2), digits=3)
+
+options(repr.plot.width=14, repr.plot.height=9)
+
+pp<-pheatmap(df,
+        clustering_distance_rows='correlation',
+        clustering_distance_cols='correlation',
+        scale='none',
+        show_rownames=T,
+        show_colnames=T,
+        cluster_rows=F,
+        cluster_cols=F,
+        cellwidth=21,
+        cellheight=14,
+        breaks=seq(0, 1, by=0.01),
+        color=colorRampPalette(brewer.pal(n=9, name="Reds"))(length(seq(0, 1, by=0.01))))
+
+save_pheatmap_pdf(pp, "rplot.pdf", width=14, height=9)
+```
+
+``` {r}
+df<-round(prop.table(x=table(combined_list$general_final_annotation, combined_list$hlca), margin=1), digits=3)
+df<-df[,38]
+```
