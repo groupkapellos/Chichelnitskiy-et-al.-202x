@@ -69,15 +69,15 @@ DimPlot(object=macs, reduction='umap', label=F, pt.size=0.1)
 
 # Find cluster markers
 DefaultAssay(macs)<-'RNA'
-results.macs<-all.markers(object=macs, min.pct=0.20, log=0.25)
+
+Idents(macs)<-macs$integrated_snn_res.0.3
+
+results.macs<-FindAllMarkers(object=macs, min.pct=0.20, log=0.25)
 results.macs<-results.macs[results.macs$p_val_adj<=0.05 & results.macs$avg_log2FC>0,]
 results.macs<-results.macs %>% arrange(cluster, -avg_log2FC)
 results.macs5<-results.macs %>% group_by(cluster) %>% top_n(n=5, wt=avg_log2FC)
 
-DotPlot(object=macs, features=unique(results.macs5$gene), cols='RdBu', dot.scale=6, dot.min=0.1) + RotatedAxis()
-
 # Plot DE genes between clusters
-macs@meta.data[macs@meta.data$disease=='Fibrosis EAA',]$disease<-'Fibrosis'
 test<-macs@assays$RNA@data  
 test<-test[rowSums(as.matrix(test))>0,]
 
@@ -120,6 +120,7 @@ pheatmap(test2,
          breaks=seq(-2, 2, by=0.05),
          color=colorRampPalette(rev(brewer.pal(n=9, name="RdBu")))(length(seq(-2, 2, by=0.05))))
 
+
 ## Monocytes
 DefaultAssay(object=myeloid)<-"integrated"
 Idents(myeloid)<-myeloid$general_final_annotation
@@ -150,15 +151,15 @@ DimPlot(object=monos, reduction='umap', label=F, pt.size=0.3)+scale_color_igv()
 
 # Find cluster markers
 DefaultAssay(monos)<-'RNA'
-results.monos<-all.markers(object=monos, min.pct=0.20, log=0.25)
+
+Idents(monos)<-monos$integrated_snn_res.0.3
+
+results.monos<-FindAllMarkers(object=monos, min.pct=0.20, log=0.25)
 results.monos<-results.monos[results.monos$p_val_adj<=0.05 & results.monos$avg_log2FC>0,]
 results.monos<-results.monos %>% arrange(cluster, -avg_log2FC)
 results.monos5<-results.monos %>% group_by(cluster) %>% top_n(n=5, wt=avg_log2FC)
 
-DotPlot(object=monos, features=unique(results.monos5$gene), cols='RdBu', dot.scale=6, dot.min=0.1) + RotatedAxis()
-
 # Plot DE genes between clusters
-monos@meta.data[monos@meta.data$disease=='Fibrosis EAA',]$disease<-'Fibrosis'
 test<-monos@assays$RNA@data  
 test<-test[rowSums(as.matrix(test))>0,]
 
@@ -199,6 +200,7 @@ pheatmap(test2,
          breaks=seq(-2, 2, by=0.05),
          color=colorRampPalette(rev(brewer.pal(n=9, name="RdBu")))(length(seq(-2, 2, by=0.05))))
 
+
 ## Dendritic cells
 DefaultAssay(object=myeloid)<-"integrated"
 Idents(myeloid)<-myeloid$general_final_annotation
@@ -229,15 +231,15 @@ DimPlot(object=dcs, reduction='umap', label=F, pt.size=0.3)+scale_color_jama()
 
 # Find cluster markers
 DefaultAssay(dcs)<-'RNA'
-results.dcs<-all.markers(object=dcs, min.pct=0.20, log=0.25)
+
+Idents(dcs)<-dcs$integrated_snn_res.0.5
+
+results.dcs<-FindAllMarkers(object=dcs, min.pct=0.20, log=0.25)
 results.dcs<-results.dcs[results.dcs$p_val_adj<=0.05 & results.dcs$avg_log2FC>0,]
 results.dcs<-results.dcs %>% arrange(cluster, -avg_log2FC)
 results.dcs5<-results.dcs %>% group_by(cluster) %>% top_n(n=5, wt=avg_log2FC)
 
-DotPlot(object=dcs, features=unique(results.dcs5$gene), cols='RdBu', dot.scale=6, dot.min=0.1) + RotatedAxis()
-
 # Plot DE genes between clusters
-dcs@meta.data[dcs@meta.data$disease=='Fibrosis EAA',]$disease<-'Fibrosis'
 test<-dcs@assays$RNA@data  
 test<-test[rowSums(as.matrix(test))>0,]
 
