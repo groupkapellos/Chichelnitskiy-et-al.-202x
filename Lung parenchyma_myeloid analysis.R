@@ -124,6 +124,7 @@ pheatmap(test2,
          breaks=seq(-2, 2, by=0.05),
          color=colorRampPalette(rev(brewer.pal(n=9, name="RdBu")))(length(seq(-2, 2, by=0.05))))
 
+
 ## Monocytes
 DefaultAssay(object=myeloid)<-"integrated"
 Idents(myeloid)<-myeloid$general_final_annotation
@@ -208,6 +209,7 @@ pheatmap(test2,
          annotation_col=df,
          breaks=seq(-2, 2, by=0.05),
          color=colorRampPalette(rev(brewer.pal(n=9, name="RdBu")))(length(seq(-2, 2, by=0.05))))
+
 
 ## Dendritic cells
 DefaultAssay(object=myeloid)<-"integrated"
