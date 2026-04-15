@@ -70,13 +70,14 @@ tcells<-RunUMAP(object=tcells, reduction='pca', dims=1:10)
 DimPlot(object=tcells, reduction='umap', label=F, pt.size=0.1)+scale_color_d3(palette='category20')
 
 # Find cluster markers
-DefaultAssay(object=tcells)<-"RNA"
-results.tcells<-all.markers(object=tcells, min.pct=0.20, log=0.25)
+DefaultAssay(tcells)<-'RNA'
+
+Idents(tcells)<-tcells$integrated_snn_res.0.4
+
+results.tcells<-FindAllMarkers(object=tcells, min.pct=0.20, log=0.25)
 results.tcells<-results.tcells[results.tcells$p_val_adj<=0.05 & results.tcells$avg_log2FC>0,]
 results.tcells<-results.tcells %>% arrange(cluster, -avg_log2FC)
 results.tcells5<-results.tcells %>% group_by(cluster) %>% top_n(n=5, wt=avg_log2FC)
-
-DotPlot(object=tcells, features=unique(results.tcells5$gene), cols='RdBu', dot.scale=6, dot.min=0.1) + RotatedAxis()
 
 # Plot DE genes between clusters
 test<-tcells@assays$RNA@data  
@@ -124,6 +125,7 @@ pheatmap(test2,
          breaks=seq(-2, 2, by=0.05),
          color=colorRampPalette(rev(brewer.pal(n=9, name="RdBu")))(length(seq(-2, 2, by=0.05))))
 
+
 ## B cells
 DefaultAssay(object=lymphoid)<-"integrated"
 Idents(lymphoid)<-lymphoid$general_final_annotation
@@ -161,8 +163,6 @@ results.bcells<-all.markers(object=bcells, min.pct=0.20, log=0.25)
 results.bcells<-results.bcells[results.bcells$p_val_adj<=0.05 & results.bcells$avg_log2FC>0,]
 results.bcells<-results.bcells %>% arrange(cluster, -avg_log2FC)
 results.bcells5<-results.bcells %>% group_by(cluster) %>% top_n(n=5, wt=avg_log2FC)
-
-DotPlot(object=bcells, features=unique(results.bcells5$gene), cols='RdBu', dot.scale=6, dot.min=0.1) + RotatedAxis()
 
 # Plot DE genes between clusters
 test<-bcells@assays$RNA@data  
@@ -212,6 +212,7 @@ pheatmap(test2,
          breaks=seq(-2, 2, by=0.05),
          color=colorRampPalette(rev(brewer.pal(n=9, name="RdBu")))(length(seq(-2, 2, by=0.05))))
 
+
 ## NK cells
 DefaultAssay(object=lymphoid)<-"integrated"
 Idents(lymphoid)<-lymphoid$general_final_annotation
@@ -244,13 +245,14 @@ nks<-RunUMAP(object=nks, reduction='pca', dims=1:30)
 DimPlot(object=nks, reduction='umap', label=F, pt.size=0.1)+scale_color_aaas()
 
 # Find cluster markers
-DefaultAssay(object=nks)<-"RNA"
-results.nks<-all.markers(object=nks, min.pct=0.20, log=0.25)
+DefaultAssay(nks)<-'RNA'
+
+Idents(nks)<-nks$integrated_snn_res.0.3
+
+results.nks<-FindAllMarkers(object=nks, min.pct=0.20, log=0.25)
 results.nks<-results.nks[results.nks$p_val_adj<=0.05 & results.nks$avg_log2FC>0,]
 results.nks<-results.nks %>% arrange(cluster, -avg_log2FC)
 results.nks5<-results.nks %>% group_by(cluster) %>% top_n(n=5, wt=avg_log2FC)
-
-DotPlot(object=nks, features=unique(results.nks5$gene), cols='RdBu', dot.scale=6, dot.min=0.1) + RotatedAxis()
 
 # Plot DE genes between clusters
 test<-nks@assays$RNA@data  
