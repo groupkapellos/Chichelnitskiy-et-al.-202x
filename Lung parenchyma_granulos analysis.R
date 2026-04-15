@@ -59,16 +59,19 @@ neutros<-RunUMAP(object=neutros, reduction='pca', dims=1:25)
 DimPlot(object=neutros, reduction='umap', label=F, pt.size=0.1) + scale_color_jco()
 
 # Find cluster markers
-DefaultAssay(object=neutros)<-"RNA"
-results.neutros<-all.markers(object=neutros, min.pct=0.20, log=0.25)
+Idents(neutros)<-neutros$disease
+neutros<-subset(neutros, idents=c("Emphysema", "Fibrosis", "Tu.free"))
+
+DefaultAssay(neutros)<-'RNA'
+
+Idents(neutros)<-neutros$integrated_snn_res.0.4
+
+results.neutros<-FindAllMarkers(object=neutros, min.pct=0.20, log=0.25)
 results.neutros<-results.neutros[results.neutros$p_val_adj<=0.05 & results.neutros$avg_log2FC>0,]
 results.neutros<-results.neutros %>% arrange(cluster, -avg_log2FC)
 results.neutros5<-results.neutros %>% group_by(cluster) %>% top_n(n=5, wt=avg_log2FC)
 
-DotPlot(object=neutros, features=rev(unique(results.neutros5$gene)), dot.min=0.1, dot.scale=8, cols='RdBu') + RotatedAxis()
-
 # Plot DE genes between clusters
-neutros@meta.data[neutros@meta.data$disease=='Fibrosis EAA',]$disease<-'Fibrosis'
 test<-neutros@assays$RNA@data  
 test<-test[rowSums(as.matrix(test))>0,]
 
@@ -87,14 +90,13 @@ tmp2$genes<-NULL
 
 test2<-tmp2[rownames(tmp2) %in% unique(results.neutros5$gene),]
 test2<-test2[unique(results.neutros5$gene),]
-test2<-test2[,c(17,1,7,11,
-                18,2,8,12,
-                19,3,9,13,
-                20,4,10,14,
-                21,5,15,
-                16)]
+test2<-test2[,c(11,1,7,
+                12,2,8,
+                13,3,9,
+                14,4,10,
+                15,5)]
 
-df<-data.frame(disease=c(rep(c('Tumor-free', 'Emphysema', 'Fibrosis', 'PAH'), 4),'Tumor-free', 'Emphysema', 'PAH', 'PAH'),
+df<-data.frame(disease=c(rep(c('Tumor-free', 'Emphysema', 'Fibrosis'), 4), 'Tumor-free', 'Emphysema'),
                clusters=sapply(strsplit(split='_', colnames(test2)), '[', 2))
 rownames(df)<-colnames(test2)
 
@@ -107,10 +109,11 @@ pheatmap(test2,
          cluster_cols=F,
          cellheight=9,
          cellwidth=12,
-         gaps_col=c(4,8,12,16,19),
+         gaps_col=c(3,6,9,12,14),
          annotation_col=df,
          breaks=seq(-2, 2, by=0.05),
          color=colorRampPalette(rev(brewer.pal(n=9, name="RdBu")))(length(seq(-2, 2, by=0.05))))
+
 
 ## Mast cells
 DefaultAssay(object=granulos)<-"integrated"
@@ -139,20 +142,24 @@ mast<-FindClusters(object=mast, resolution=0.2, group.singletons=T)
 # Run UMAP
 mast<-RunUMAP(object=mast, reduction='pca', dims=1:20)
 DimPlot(object=mast, reduction='umap', label=F, pt.size=0.1) + scale_color_uchicago()
+
 # Find cluster markers
-DefaultAssay(object=mast)<-"RNA"
-results.mast<-all.markers(object=mast, min.pct=0.20, log=0.25)
+Idents(mast)<-mast$disease
+mast<-subset(mast, idents=c("Emphysema", "Fibrosis", "Tu.free"))
+
+DefaultAssay(mast)<-'RNA'
+
+Idents(mast)<-mast$integrated_snn_res.0.2
+
+results.mast<-FindAllMarkers(object=mast, min.pct=0.20, log=0.25)
 results.mast<-results.mast[results.mast$p_val_adj<=0.05 & results.mast$avg_log2FC>0,]
 results.mast<-results.mast %>% arrange(cluster, -avg_log2FC)
 results.mast5<-results.mast %>% group_by(cluster) %>% top_n(n=5, wt=avg_log2FC)
 
-DotPlot(object=mast, features=rev(unique(results.mast5$gene)), dot.min=0.1, dot.scale=8, cols='RdBu') + RotatedAxis()
-
 # Plot DE genes between clusters
-mast@meta.data[mast@meta.data$disease=='Fibrosis EAA',]$disease<-'Fibrosis'
 test<-mast@assays$RNA@data  
-test<-test[rowSums(as.matrix(test))>0,]
 
+test<-test[rowSums(as.matrix(test))>0,]
 tmp2<-data.frame(rownames(test))
 colnames(tmp2)<-'genes'
 mast@meta.data$heatmap<-paste(mast@meta.data$disease, sep='_', mast@meta.data$integrated_snn_res.0.2)
@@ -168,11 +175,11 @@ tmp2$genes<-NULL
 
 test2<-tmp2[rownames(tmp2) %in% unique(results.mast5$gene),]
 test2<-test2[unique(results.mast5$gene),]
-test2<-test2[,c(9,1,4,7,
-                10,2,5,8,
-                11,3,6)]
+test2<-test2[,c(7,1,4,
+                8,2,5,
+                9,3,6)]
 
-df<-data.frame(disease=c(rep(c('Tumor-free', 'Emphysema', 'Fibrosis', 'PAH'), 2),'Tumor-free', 'Emphysema', 'Fibrosis'),
+df<-data.frame(disease=c(rep(c('Tumor-free', 'Emphysema', 'Fibrosis'), 3)),
                clusters=sapply(strsplit(split='_', colnames(test2)), '[', 2))
 rownames(df)<-colnames(test2)
 
@@ -185,7 +192,7 @@ pheatmap(test2,
          cluster_cols=F,
          cellheight=9,
          cellwidth=12,
-         gaps_col=c(4,8),
+         gaps_col=c(3,6),
          annotation_col=df,
          breaks=seq(-2, 2, by=0.05),
          color=colorRampPalette(rev(brewer.pal(n=9, name="RdBu")))(length(seq(-2, 2, by=0.05))))
