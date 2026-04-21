@@ -212,37 +212,13 @@ dim(tmp)
 cells_rankings<-AUCell_buildRankings(tmp)
 cells_rankings
 
-markers.0<-read_xlsx('DE genes_bal_0vs12.xlsx')
-markers.0<-markers.0[markers.0$median_wmw_odds>=1,]$...1
-
-markers.1<-read_xlsx('DE genes_bal_1vs02.xlsx')
-markers.1<-markers.1[markers.1$median_wmw_odds>=1,]$...1
-
-markers.2<-read_xlsx('DE genes_bal_2vs01.xlsx')
-markers.2<-markers.2[markers.2$median_wmw_odds>=1,]$...1
-
-gene_copd<-list(markers.0, markers.1, markers.2)
-names(gene_copd)<-paste('Seq-well BALF cluster',sep='_',0:2)
-
-wauters<-list(progenitors=c('CD63','CTSD','CXCR4','VEGFA','CTSA'),
-              immature=c('LTF','LCN2','MMP8','PADI4','MMP9','ARG1'),
-              inflammatory_s100=c('S100A12','S100A9','S100A8','IFITM2','IFITM1'),
-              inflammatory_ccl=c('CCL4','CCL3','CXCL8','IL1B'),
-              mixed=c('CTSL','CD74','HLA-DRA','CTSB','APOE','C1QC','C1QB'))
-
 granules<-list(azurophil=c('CD63','CD68','MPO','BPI','DEFA3','DEFA4','ELANE','AZU1','CTSG','PRTN3','NSP4','CTSC','SERPINA1','LYZ'),
                specific=c('ITGAM','ITGB2','CEACAM8','CD177','NOX2','SCAMP1','SERPINA1','LYZ','B2M','MMP1','MMP8','MMP9','MMP13','MMP2','HP','CAMP','LTF','LCN2','PTX3','SLPI','OLFM4'),
                gelatinase=c('ITGAM','ITGB2','CD177','NOX2','MMP25','FPR1','SCAMP1','VAMP2','LYZ','ARG1','MMP2','MMP9','FCN1'),
                secretory=c('MME','ITGAM','ITGB2','FUT4','ALP','FCGR3B','CR1','NOX2','MMP25','SLC11A2','SCAMP1','VAMP2','SERPINA1','HP'))
 
-cells_AUC<-AUCell_calcAUC(gene_copd, cells_rankings, aucMaxRank=ceiling(0.05*nrow(cells_rankings)), normAUC=T)
+cells_AUC<-AUCell_calcAUC(granules, cells_rankings, aucMaxRank=ceiling(0.05*nrow(cells_rankings)), normAUC=T)
 cells_AUC
-
-cells_AUC2<-AUCell_calcAUC(wauters, cells_rankings, aucMaxRank=ceiling(0.05*nrow(cells_rankings)), normAUC=T)
-cells_AUC2
-
-cells_AUC3<-AUCell_calcAUC(granules, cells_rankings, aucMaxRank=ceiling(0.05*nrow(cells_rankings)), normAUC=T)
-cells_AUC3
 
 res<-as.data.frame(t(getAUC(cells_AUC)))
 res$cluster<-neutros$integrated_snn_res.0.4
@@ -252,30 +228,6 @@ res %>% group_by(cluster,variable) %>% summarize(Mean=mean(value))->df.tmp
 res<-dcast(formula=variable~cluster, data=df.tmp, value.var='Mean')
 rownames(res)<-res$variable
 res$variable<-NULL
-df.tmp$Mean <- scale(df.tmp$Mean)
-res<-merge(res, df.tmp, key="cluster", all=T)
-
-ggplot(res, aes(x=variable, y=value, fill=Mean)) + 
-  geom_violin(draw_quantiles=c(0.5), scale='width', adjust=3, trim=T)+
-  scale_fill_gradient(low="white", high="blue")+
-  facet_wrap(~cluster, ncol=3)+
-  ylab("AUC score")+ 
-  xlab("cluster")+
-  guides(fill=F)+
-  theme(text=element_text(size=14),
-        axis.title.y=element_text(size=14,face='bold'),
-        axis.title.x=element_blank(),
-        axis.text.x=element_text(size=14,face='bold', angle=90),
-        axis.text.y=element_text(size=14,colour='black'),
-        strip.text=element_text(size=12),
-        strip.background=element_rect(fill='gray84',colour='black'),
-        legend.title=element_text(size=14,face='bold'),
-        legend.position='right',
-        legend.key=element_rect(colour='black',fill='white'),
-        legend.spacing.x=unit(0.3, 'cm'),
-        panel.background=element_rect(fill='white'),
-        panel.border=element_blank(),
-        axis.line=element_line(colour="black"))
 
 pheatmap(res,
          clustering_distance_rows='correlation',
@@ -289,100 +241,3 @@ pheatmap(res,
          cellwidth=35,
          breaks=seq(0, 1, by=0.05),
          color=colorRampPalette(brewer.pal(n=9, name="Blues"))(length(seq(0, 1, by=0.05))))
-
-res2<-as.data.frame(t(getAUC(cells_AUC2)))
-res2$cluster<-neutros$integrated_snn_res.0.4
-res2<-melt(res2, id.vars=c('cluster'))
-
-res2 %>% group_by(cluster,variable) %>% summarize(Mean=mean(value))->df.tmp
-res2<-dcast(formula=variable~cluster, data=df.tmp, value.var='Mean')
-rownames(res2)<-res2$variable
-res2$variable<-NULL
-df.tmp$Mean <- scale(df.tmp$Mean)
-res2<-merge(res2, df.tmp, key="cluster", all=T)
-
-ggplot(res2, aes(x=cluster, y=value, fill=Mean)) + 
-  geom_violin(draw_quantiles=c(0.5), scale='width', adjust=3, trim=T)+
-  scale_fill_gradient(low="white", high="red")+
-  facet_wrap(~variable, ncol=3)+
-  ylab("AUC score")+ 
-  xlab("cluster")+
-  guides(fill=F)+
-  theme(text=element_text(size=14),
-        axis.title.y=element_text(size=14,face='bold'),
-        axis.title.x=element_blank(),
-        axis.text.x=element_text(size=14,face='bold', angle=90),
-        axis.text.y=element_text(size=14,colour='black'),
-        strip.text=element_text(size=12),
-        strip.background=element_rect(fill='gray84',colour='black'),
-        legend.title=element_text(size=14,face='bold'),
-        legend.position='right',
-        legend.key=element_rect(colour='black',fill='white'),
-        legend.spacing.x=unit(0.3, 'cm'),
-        panel.background=element_rect(fill='white'),
-        panel.border=element_blank(),
-        axis.line=element_line(colour="black"))
-
-pheatmap(res2,
-         clustering_distance_rows='correlation',
-         clustering_distance_cols='correlation',
-         scale='row',
-         show_rownames=T,
-         show_colnames=T,
-         cluster_rows=F,
-         cluster_cols=F,
-         cellheight=17,
-         cellwidth=30,
-         breaks=seq(0, 1, by=0.1),
-         color=colorRampPalette(brewer.pal(n=7, name="Oranges"))(length(seq(0, 1, by=0.1))))
-
-res3<-as.data.frame(t(getAUC(cells_AUC3)))
-res3$cluster<-neutros$integrated_snn_res.0.4
-res3<-melt(res3, id.vars=c('cluster'))
-
-res3 %>% group_by(cluster,variable) %>% summarize(Mean=mean(value))->df.tmp
-res3<-dcast(formula=variable~cluster, data=df.tmp, value.var='Mean')
-rownames(res3)<-res3$variable
-res3$variable<-NULL
-df.tmp$Mean <- scale(df.tmp$Mean)
-res3<-merge(res3, df.tmp, key="cluster", all=T)
-
-ggplot(res3, aes(x=variable, y=value, fill=Mean)) + 
-  geom_violin(draw_quantiles=c(0.5), scale='width', adjust=3, trim=T)+
-  scale_fill_gradient(low="white", high="blue")+
-  facet_wrap(~cluster, ncol=3)+
-  ylab("AUC score")+ 
-  xlab("cluster")+
-  guides(fill=F)+
-  theme(text=element_text(size=14),
-        axis.title.y=element_text(size=14,face='bold'),
-        axis.title.x=element_blank(),
-        axis.text.x=element_text(size=14,face='bold', angle=90),
-        axis.text.y=element_text(size=14,colour='black'),
-        strip.text=element_text(size=12),
-        strip.background=element_rect(fill='gray84',colour='black'),
-        legend.title=element_text(size=14,face='bold'),
-        legend.position='right',
-        legend.key=element_rect(colour='black',fill='white'),
-        legend.spacing.x=unit(0.3, 'cm'),
-        panel.background=element_rect(fill='white'),
-        panel.border=element_blank(),
-        axis.line=element_line(colour="black"))
-
-pheatmap(res3,
-         clustering_distance_rows='correlation',
-         clustering_distance_cols='correlation',
-         scale='row',
-         show_rownames=T,
-         show_colnames=T,
-         cluster_rows=F,
-         cluster_cols=F,
-         cellheight=30,
-         cellwidth=35,
-         breaks=seq(0, 1, by=0.05),
-         color=colorRampPalette(brewer.pal(n=9, name="Reds"))(length(seq(0, 1, by=0.05))))
-
-VlnPlot(neutros, features=c('CD63','CTSC','SERPINA1','LYZ'))
-VlnPlot(neutros, features=c('ITGB2','MMP9'))
-VlnPlot(neutros, features=c('FPR1','ARG1'))
-VlnPlot(neutros, features=c('MME','FCGR3B'))
