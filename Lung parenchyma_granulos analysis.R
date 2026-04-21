@@ -229,7 +229,7 @@ res<-dcast(formula=variable~cluster, data=df.tmp, value.var='Mean')
 rownames(res)<-res$variable
 res$variable<-NULL
 
-pheatmap(res,
+pheatmap(res[,1:5],
          clustering_distance_rows='correlation',
          clustering_distance_cols='correlation',
          scale='row',
