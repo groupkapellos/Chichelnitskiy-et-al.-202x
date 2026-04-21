@@ -28,13 +28,13 @@ for (i in 1:2){
 }
 
 # Prepare gene sets
-zilio2<-list(setdiff(zilio[[1]], unique(c(zilio[[2]],zilio[[3]],zilio[[4]],zilio[[5]]))),
-             setdiff(zilio[[2]], unique(c(zilio[[1]],zilio[[3]],zilio[[4]],zilio[[5]]))),
-             setdiff(zilio[[3]], unique(c(zilio[[2]],zilio[[1]],zilio[[4]],zilio[[5]]))),
-             setdiff(zilio[[4]], unique(c(zilio[[2]],zilio[[3]],zilio[[1]],zilio[[5]]))),
-             setdiff(zilio[[5]], unique(c(zilio[[2]],zilio[[3]],zilio[[4]],zilio[[1]]))))
+zilio<-list(setdiff(zilio[[1]], unique(c(zilio[[2]],zilio[[3]],zilio[[4]],zilio[[5]]))),
+            setdiff(zilio[[2]], unique(c(zilio[[1]],zilio[[3]],zilio[[4]],zilio[[5]]))),
+            setdiff(zilio[[3]], unique(c(zilio[[2]],zilio[[1]],zilio[[4]],zilio[[5]]))),
+            setdiff(zilio[[4]], unique(c(zilio[[2]],zilio[[3]],zilio[[1]],zilio[[5]]))),
+            setdiff(zilio[[5]], unique(c(zilio[[2]],zilio[[3]],zilio[[4]],zilio[[1]]))))
              
-names(zilio2)<-colnames(zilionis)[2:6]
+names(zilio)<-colnames(zilionis)[2:6]
 
 trava2<-list(setdiff(trava[[1]], trava[[2]]),
              setdiff(trava[[2]], trava[[1]]))
@@ -54,14 +54,6 @@ for (i in sort(as.character(unique(neutros@meta.data$integrated_snn_res.0.4)),de
   tmp2<-cbind(tmp2,tmp)
 }  
 tmp2$genes<-NULL
-
-genes<-c(mor[[1]], mor[[2]], mor[[3]])
-genes<-c('MS4A6A','LGALS2','CPVL','CD69','HLA-DRA','HLA-DRB1','HLA-DPA1','HLA-DPB1','HLA-DQA1','HLA-DQB1',
-         'CTNNB1','C1orf56','CDC42SE1',
-         'FCGR3A','LST1','AIF1','CD52',
-         'S100A8','S100A9','S100A12','VCAN','LYZ','CD14',
-         'MALAT1','NEAT1','MT-CYB','MT-CO1','MT-CO2','MT-CO3','MT-ND2','MT-ND3','MT-ND4','MT-ND5','MT-ATP6','UCP2')
-genes<-c(flo2[[1]],flo2[[2]],flo2[[3]],flo2[[4]])
 
 test2<-tmp2[rownames(tmp2) %in% genes,]
 test2<-test2[genes,]
