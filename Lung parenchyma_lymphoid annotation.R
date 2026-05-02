@@ -1,6 +1,3 @@
-# Remove unneeded objects 
-rm(list=ls())
-
 # Load packages
 library(readxl)
 library(dplyr)
