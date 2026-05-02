@@ -1,7 +1,3 @@
-# Set directory
-setwd('D:/Theo/Documents/LIMES/LIMES 2019-20+/Papers/Hannover paper/CoCena')
-getwd()
-
 # Load packages
 library(readxl)
 library(pheatmap)
