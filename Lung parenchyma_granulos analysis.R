@@ -1,5 +1,8 @@
-# Set directory
-setwd('~/hannover/analysis/Theo_analysis')
+# Load packages
+library(Seurat)
+library(dplyr)
+library(pheatmap)
+library(RColorBrewer)
 
 # All granulocytes
 DefaultAssay(object=combined_list)<-"integrated"
