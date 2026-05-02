@@ -1,9 +1,3 @@
-# Remove unneeded objects 
-rm(list=ls())
-
-# Set directory
-setwd('~/hannover/analysis/Theo_analysis')
-
 # Load packages
 library(Seurat)
 library(readxl)
