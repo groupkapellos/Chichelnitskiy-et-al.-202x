@@ -12,10 +12,6 @@ source("https://bioconductor.org/biocLite.R")
 if(length(new.packages.bioc)>0) biocLite(new.packages.bioc,suppressUpdates=TRUE)
 lapply(c(list.of.packages,list.of.bioc.packages,"SingleR"), require, character.only=TRUE)
 
-# Set working directory
-dir<-"~/hannover/alignment/2020-05-22/output/results/samples"
-setwd(dir)
-
 # Create Seurat objects for each pool   
 sample217<-paste('Sample', sep='_', 204:211)
 sample222<-paste('Sample', sep='_', 212:215)
