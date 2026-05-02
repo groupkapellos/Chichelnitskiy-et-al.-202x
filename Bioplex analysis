@@ -1,0 +1,161 @@
+# Load packages
+library(dplyr)
+library(RColorBrewer)
+library(pheatmap)
+library(reshape2)
+library(car)
+library(ggplot2)
+
+# Load the data
+data<-read.delim('111220_Hannover_Bioplex_table.txt', header=T)
+data<-data[c(2:10,12:27,29:41,44:46,48,50:56,62,64,71,72,74,75,80,81,84),1:28]
+data[is.na(data)]<-0.01
+metadata<-read.delim('261020_Hannover_sample_table.txt', header=T)
+
+common<-intersect(data$LuT, metadata$LuT)
+
+data<-data[data$LuT %in% common,]
+metadata<-metadata[metadata$LuT %in% common,]
+
+# Prepare data for plotting
+rownames(data)<-data$LuT
+data$LuT<-NULL
+data<-t(data)
+data['IL1b','LuT_355']<-0.01
+data<-log2(data)
+
+df<-data.frame(colnames(data),
+               tissue=metadata$tissue[match(colnames(data),metadata$LuT)],
+               anatomy=metadata$site_general[match(colnames(data),metadata$LuT)],
+               immediate=metadata$Immediate[match(colnames(data),metadata$LuT)],
+               disease=metadata$disease[match(colnames(data),metadata$LuT)])
+
+df[]<-lapply(df, factor)
+
+rownames(df)<-df[,1]
+df$colnames.data.<-NULL
+
+disease<-c('#D5C3AA','#CB0000', '#FFCCAC', '#7CAA2D', '#662E1C', '#CBC318')
+names(disease)<-c('Tu.free', 'Fibrosis','Fibrosis EAA', 'Emphysema', 'Fibrosis+Emphysema', 'PAH')
+
+anatomy<-c('#B66353','#128277', '#FBB04E')
+names(anatomy)<-c('lower_lobe', 'middle_lobe', 'upper_lobe')
+
+tissue<-c('#4F6980','#F47942')
+names(tissue)<-c('parenchyma', 'LN')
+
+immediate<-c('white','black')
+names(immediate)<-c(0,1)
+
+# Plot the heatmap
+tmp<-metadata[metadata$tissue=='parenchyma' & metadata$disease %in% c('Emphysema', 'Fibrosis'),]
+data2<-data[,as.character(tmp %>% arrange(disease) %>% pull(LuT))]
+
+pheatmap(data2,
+         clustering_distance_rows='correlation',
+         clustering_distance_cols='correlation',
+         scale='row',
+         show_rownames=T,
+         show_colnames=F,
+         cluster_rows=T,
+         cluster_cols=F,
+         cellheight=10,
+         cellwidth=6,
+         gaps_col=18,
+         breaks=seq(-2, 2, by=0.1),
+         main='',
+         annotation_col=df,
+         annotation_colors=list(immediate=immediate, tissue=tissue, anatomy=anatomy, disease=disease),
+         color=colorRampPalette(rev(brewer.pal(n=7, name='BrBG')))(length(seq(-2, 2, by=0.1))))
+
+tmp<-metadata[metadata$tissue=='LN',]
+data2<-data[,as.character(tmp %>% arrange(disease) %>% pull(LuT))]
+
+pheatmap(data2,
+         clustering_distance_rows='correlation',
+         clustering_distance_cols='correlation',
+         scale='row',
+         show_rownames=T,
+         show_colnames=F,
+         cluster_rows=T,
+         cluster_cols=F,
+         cellheight=10,
+         cellwidth=6,
+         gaps_col=6,
+         breaks=seq(-2, 2, by=0.1),
+         main='',
+         annotation_col=df,
+         annotation_colors=list(immediate=immediate, tissue=tissue, anatomy=anatomy, disease=disease),
+         color=colorRampPalette(rev(brewer.pal(n=7, name='BrBG')))(length(seq(-2, 2, by=0.1))))
+
+# Perform statistical comparison
+data2<-as.data.frame(t(data))
+data2<-data2[rownames(df),]
+data2$disease<-df$disease
+data2$tissue<-df$tissue
+data2$LuT<-rownames(data2)
+data2<-melt(data2, id.vars=c('disease','tissue','LuT'))
+
+# Parenchyma
+for (i in unique(data2$variable)){
+  print(paste0('Statistical analysis for ', i))
+  
+  if(mean(tmp[tmp$disease=='Fibrosis',]$value)>=mean(tmp[tmp$disease=='Emphysema',]$value)){
+    print('Higher in fibrosis')}
+  else {
+    print('Higher in emphysema')
+  }
+  
+  tmp<-data2[data2$disease %in% c('Fibrosis', 'Emphysema'),]
+  tmp<-tmp[tmp$tissue=='parenchyma',]
+  tmp<-tmp[tmp$variable==i,]
+  norm1<-shapiro.test(tmp[tmp$disease=='Emphysema',]$value)
+  norm2<-shapiro.test(tmp[tmp$disease=='Fibrosis',]$value)
+  var<-var.test(value~disease, data=tmp)
+  
+  if(norm1$p.value<=0.05 | norm2$p.value<=0.05){
+    res<-wilcox.test(value~disease, data=tmp)
+    print(paste0('Wilcoxon test for ', i))
+    print(res$p.value)
+  } else if(var$p.value<=0.05){
+    res<-t.test(value~disease, data=tmp, var.equal=F)
+    print(paste0('t test with unequal variance for ', i))
+    print(res$p.value)
+  } else{
+    res<-t.test(value~disease, data=tmp, var.equal=F)
+    print(paste0('t test with equal variance for ', i))
+    print(res$p.value)
+  }
+}
+
+# Lymph node
+for (i in unique(data2$variable)){
+  print(paste0('Statistical analysis for ', i))
+  
+  if(mean(tmp[tmp$disease=='Fibrosis',]$value)>=mean(tmp[tmp$disease=='Emphysema',]$value)){
+    print('Higher in fibrosis')
+  } else {
+    print('Higher in emphysema')
+  }
+  
+  tmp<-data2[data2$disease %in% c('Fibrosis', 'Emphysema'),]
+  tmp<-tmp[tmp$tissue=='LN',]
+  tmp<-tmp[tmp$variable==i,]
+  norm1<-shapiro.test(tmp[tmp$disease=='Emphysema',]$value)
+  norm2<-shapiro.test(tmp[tmp$disease=='Fibrosis',]$value)
+  var<-var.test(value~disease, data=tmp)
+  
+  if(norm1$p.value<=0.05 | norm2$p.value<=0.05){
+    res<-wilcox.test(value~disease, data=tmp)
+    print(paste0('Wilcoxon test for ', i))
+    print(res$p.value)
+  } else if(var$p.value<=0.05){
+    res<-t.test(value~disease, data=tmp, var.equal=F)
+    print(paste0('t test with unequal variance for ', i))
+    print(res$p.value)
+  } else{
+    res<-t.test(value~disease, data=tmp, var.equal=F)
+    print(paste0('t test with equal variance for ', i))
+    print(res$p.value)
+    }
+}
