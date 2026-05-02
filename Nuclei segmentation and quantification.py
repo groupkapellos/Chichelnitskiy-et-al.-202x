@@ -8,9 +8,6 @@ import pandas as pd  # Version 2.2.3
 from skimage import measure  # Version 0.25.2
 from skimage.measure import label  # Version 0.25.2
 
-# Set working directory
-os.chdir(<USER/TIF_Image_Folder>)
-
 # Convert pixel size to microns according to metadata of image
 pixels_to_um = 0.3442348
 
