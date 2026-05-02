@@ -1,6 +1,3 @@
-# Remove existing variables from R memory
-rm(list=ls())
-
 # Load packages
 library(Seurat)
 library(dplyr)
