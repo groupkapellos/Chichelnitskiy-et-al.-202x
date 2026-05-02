@@ -18,11 +18,6 @@ head(data)
 ```
 
 ```{r}
-# Load data
-load('/home/theo/R/Bonn/Parenchyma_analysis_TK_env.RData')
-```
-
-```{r}
 # Save labels in the seurat object
 combined_list$hlca<-data$Level_4_transfered_label[match(rownames(combined_list@meta.data), data$X)]
 table(combined_list$hlca)[table(combined_list$hlca)>=10]
