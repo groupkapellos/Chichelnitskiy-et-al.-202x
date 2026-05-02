@@ -3,10 +3,6 @@
 import os
 import pandas as pd  # Version 2.2.3
 
-
-# Set working directory
-os.chdir(<USER/Target_Folder>)
-
 # Load nuclei measurements of all slides as dataframes
 nuclei_f1S1 = pd.read_csv("First round/Slide 1/Tif images/nuclei_segmentation/Total_nuclei_measurements.csv")
 nuclei_f1S2 = pd.read_csv("First round/Slide 2/Tif images/nuclei_segmentation/Total_nuclei_measurements.csv")
