@@ -1,6 +1,3 @@
-# Remove existing variables from R memory
-rm(list=ls())
-
 # Load packages
 list.of.packages<-c("gdata","data.table","ggplot2","scales","useful","Seurat","readr","dplyr","RColorBrewer","Matrix","ggExtra","backports","jsonlite","ggrepel")
 new.packages<-list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
