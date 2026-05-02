@@ -1,6 +1,3 @@
-# Remove existing variables from R memory
-rm(list=ls()) 
-
 # Load packages
 list.of.packages<-c("gdata","data.table","ggplot2","scales","useful","Seurat","readr","dplyr","RColorBrewer","Matrix","ggExtra","backports","jsonlite","ggrepel")
 new.packages<-list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
@@ -14,10 +11,6 @@ new.packages.bioc<-list.of.bioc.packages[!(list.of.bioc.packages %in% installed.
 source("https://bioconductor.org/biocLite.R")
 if(length(new.packages.bioc)>0) biocLite(new.packages.bioc,suppressUpdates=TRUE)
 lapply(c(list.of.packages,list.of.bioc.packages,"SingleR"), require, character.only=TRUE)
-
-# Set working directory
-dir<-"~/hannover/alignment/2020-05-22/output/results/samples"
-setwd(dir)
 
 # Create Seurat objects for each pool   
 sample329<-paste('Sample', sep='_', c(286:288, 290, 292))
