@@ -4,9 +4,6 @@ import os
 import pandas as pd  # Version 2.2.3
 import numpy as np  # Version 2.2.5
 
-# Set working directory
-os.chdir(<USER/target_folder>)
-
 # Load separate sheets with nuclei counts for each slide into dataframes
 nuclei_counts_f1S1 = pd.read_excel("Nuclei_counts_all_slides.xlsx", sheet_name = "f1S1")
 nuclei_counts_f1S2 = pd.read_excel("Nuclei_counts_all_slides.xlsx", sheet_name = "f1S2")
