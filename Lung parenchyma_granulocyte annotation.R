@@ -52,8 +52,8 @@ for (i in sort(as.character(unique(neutros@meta.data$integrated_snn_res.0.4)),de
 }  
 tmp2$genes<-NULL
 
-test2<-tmp2[rownames(tmp2) %in% genes,]
-test2<-test2[genes,]
+test2<-tmp2[rownames(tmp2) %in% unlist(zilio),]
+test2<-test2[unlist(zilio),]
 test2<-test2[!grepl('NA', rownames(test2)),]
 
 pheatmap(test2,
