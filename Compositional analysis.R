@@ -1,7 +1,4 @@
-# ============================================================
-# Compositional analysis using propeller
-# ============================================================
-
+# Load packages
 suppressPackageStartupMessages({
   library(Seurat)
   library(SingleCellExperiment)
@@ -12,10 +9,7 @@ suppressPackageStartupMessages({
   library(tibble)
 })
 
-# ------------------------------------------------------------
 # Settings
-# ------------------------------------------------------------
-
 out_root <- "D:/Empysema_Fibrosis_Revisions/Compositional_analysis_tables"
 dir.create(out_root, showWarnings = FALSE, recursive = TRUE)
 
@@ -28,10 +22,7 @@ remove_celltypes <- c(
   "Doublet", "Doublets", "doublet"
 )
 
-# ------------------------------------------------------------
 # Build SingleCellExperiment object for propeller
-# ------------------------------------------------------------
-
 build_sce_for_propeller <- function(seu,
                                     sample_col,
                                     condition_col,
@@ -100,10 +91,7 @@ build_sce_for_propeller <- function(seu,
   return(sce)
 }
 
-# ------------------------------------------------------------
 # Run propeller for one pairwise comparison
-# ------------------------------------------------------------
-
 run_propeller_pair <- function(sce, group_1, group_2, transform = "asin") {
   
   sce_pair <- sce[, sce$group %in% c(group_1, group_2)]
@@ -130,10 +118,7 @@ run_propeller_pair <- function(sce, group_1, group_2, transform = "asin") {
     relocate(comparison, group_1, group_2, cell_type)
 }
 
-# ------------------------------------------------------------
 # Run all pairwise comparisons
-# ------------------------------------------------------------
-
 run_propeller_all_pairwise <- function(seu,
                                        dataset_name,
                                        out_root,
@@ -176,11 +161,8 @@ run_propeller_all_pairwise <- function(seu,
   return(results)
 }
 
-# ------------------------------------------------------------
-# Analysis 1: Parenchyma
+## Analysis 1: Parenchyma
 # Tu.free vs Emphysema vs Fibrosis
-# ------------------------------------------------------------
-
 combined_parenchyma <- subset(
   combined_list,
   subset = disease %in% c("Tu.free", "Emphysema", "Fibrosis")
@@ -197,11 +179,8 @@ propeller_parenchyma <- run_propeller_all_pairwise(
   transform = "asin"
 )
 
-# ------------------------------------------------------------
-# Analysis 2: Lymph node
+## Analysis 2: Lymph node
 # Emphysema vs Fibrosis
-# ------------------------------------------------------------
-
 lymphnode_subset <- subset(
   lymphnode,
   subset = disease %in% c("Emphysema", "Fibrosis")
@@ -217,13 +196,6 @@ propeller_lymphnode <- run_propeller_all_pairwise(
   remove_celltypes = remove_celltypes,
   transform = "asin"
 )
-
-# ------------------------------------------------------------
-# Save session information
-# ------------------------------------------------------------
-
-session_file <- file.path(out_root, "sessionInfo_propeller_analysis.txt")
-
 sink(session_file)
 sessionInfo()
 sink()
