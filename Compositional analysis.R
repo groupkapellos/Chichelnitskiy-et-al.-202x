@@ -9,6 +9,29 @@ suppressPackageStartupMessages({
   library(tibble)
 })
 
+#present in emphysema & fibrosis (>3 cells)
+#present in parenchyma & ln (>3 cells)
+
+lung macs (0-5) 0-3 # 5 only in fibrosis, 4 no cycling macs in lns
+lung monos (0-5) 0-5
+lung cdcs (0-4) 0,1,3 # 4 no cycling dcs in lns
+lung pdcs (0-4) 2
+lung T (0-10) 0-3, 5-6 # 4 only in emphysema, 8-10 only in emphysema/tumor-free
+lung cycling T (0-10) 7
+lung B (0-4) 1 
+lung plasma (0-4) 2-3 # 0 contamination, 4 only in fibrosis
+lung NK (0-3) 0-3
+
+ln macs (0-4) 0-1 # 2-4 only in emphysema
+ln monos (0-2) 0 # 1-2 only in emphysema
+ln cdcs (0-2) 0 # 2 only in fibrosis/contamination
+ln pdcs (0-2) 1
+ln T (0-6) 0-5
+ln cycling T (0-6) 6
+ln B (0-8) 1
+ln plasma (0-8) 0, 2 # 5-8 only in fibrosis, 3, 4 only in LuT#503
+ln NK (0-2) 1 # 0 contamination, 2 only in fibrosis
+
 # Settings
 out_root <- "D:/Empysema_Fibrosis_Revisions/Compositional_analysis_tables"
 dir.create(out_root, showWarnings = FALSE, recursive = TRUE)
