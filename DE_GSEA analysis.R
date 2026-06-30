@@ -7,10 +7,6 @@ library(biomaRt)
 library(clusterProfiler)
 library(ggplot2)
 
-# Set directory
-setwd('C:/Users/theodoros.kapellos/Downloads')
-getwd()
-
 # Load DE genes
 genes<-readxl::read_xlsx('Table S5.xlsx', sheet=6)
 
