@@ -8,12 +8,12 @@ library(clusterProfiler)
 library(ggplot2)
 
 # Load DE genes
-genes<-readxl::read_xlsx('Table S5.xlsx', sheet=6)
+genes<-readxl::read_xlsx('Table S3.xlsx', sheet=4)
 
 # Perform pathway analysis
 deg2<-data.frame()
 
-for(i in unique(genes$cluster)[c(1)]){
+for(i in unique(genes$cluster)[c(1,2,4,5)]){
   tmp1<-genes[genes$direction=='Higher in emphysema' & genes$cluster==i,]$Gene
   
   GO.up<-enrichGO(gene=tmp1,
@@ -32,20 +32,20 @@ for(i in unique(genes$cluster)[c(1)]){
     df1<-df1[df1$Count>=3,]
     df1$cluster<-i
     df1$disease<-'Higher in emphysema'
-    }
+  }
   
   tmp2<-genes[genes$direction=='Higher in fibrosis' & genes$cluster==i,]$Gene
   
   GO.up2<-enrichGO(gene=tmp2,
-                  OrgDb=org.Hs.eg.db,
-                  ont='BP',
-                  keyType='SYMBOL',
-                  minGSSize=10,
-                  maxGSSize=500,
-                  pvalueCutoff=0.05,
-                  readable=FALSE)
+                   OrgDb=org.Hs.eg.db,
+                   ont='BP',
+                   keyType='SYMBOL',
+                   minGSSize=10,
+                   maxGSSize=500,
+                   pvalueCutoff=0.05,
+                   readable=FALSE)
   
-  GO.up2<-simplify(GO.up, cutoff=0.7, by="p.adjust", select_fun=min)
+  GO.up2<-simplify(GO.up2, cutoff=0.7, by="p.adjust", select_fun=min)
   df2<-as.data.frame(GO.up2)
   
   if (nrow(df2) > 0) {
