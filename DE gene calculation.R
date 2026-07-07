@@ -67,7 +67,7 @@ for(i in levels(mast$integrated_snn_res.0.2)){
   
   if(dim(res.emph)[1]>0){
     res.emph$gene<-rownames(res.emph)
-    res.emph$direction<-'Emphysema vs rest'
+    res.emph$direction<-'Higher in emphysema'
     res.emph$cluster<-paste0('mast', i)
   }
   
@@ -84,7 +84,7 @@ for(i in levels(mast$integrated_snn_res.0.2)){
   
   if(dim(res.fib)[1]>0){
     res.fib$gene<-rownames(res.fib)
-    res.fib$direction<-'Fibrosis vs rest'
+    res.fib$direction<-'HIgher in fibrosis'
     res.fib$cluster<-paste0('mast', i)
   }
   
