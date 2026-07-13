@@ -1,5 +1,4 @@
-# COPD vs IPF pseudobulk ssGSEA 
-
+# Load packages
 suppressPackageStartupMessages({
   library(Seurat)
   library(Matrix)
@@ -10,11 +9,7 @@ suppressPackageStartupMessages({
   library(car)
 })
 
-COPD_PATH <- "data/COPD_processed.rds"
-IPF_PATH <- "data/IPF_processed.rds"
-SIGNATURE_PATH <- "data/signature_genes.csv"
-OUT_DIR <- "results/ssGSEA"
-
+# Set parameters
 CELLTYPES <- c(
   "Macrophages", "Monocytes_Neutrophils", "DCs",
   "NK_cells", "T_cells", "B_cells"
