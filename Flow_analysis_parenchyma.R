@@ -1,0 +1,129 @@
+# Load packages
+library(readxl)
+library(ggplot2)
+library(reshape2)
+library(car)
+library(dunn.test)
+
+## SCS1
+
+# Load data
+data<-read_xlsx('6-1-21_Parenchyma statistics.xlsx')
+colnames(data)<-c('fcs','LuT','Tissue','Disease','Panel','Lin_percent','Granulocytes_percent','HLA.DR_myeloid cells_percent','Neutrophils_percent','HLA.DR_neutrophils_percent',
+                  'Eosinophils_percent','CD14.monocytes_percent','Autofluorescence_percent','CD14.CD16_percent','AMs_percent','DCs_percent','Mast_percent','HLA.DR_mast_percent',
+                  'Neutrophils','Eosinophils','CD14.monocytes','AMs','DCs','Mast')
+
+data<-data[,c(2,4,19:24)]
+#data<-data[,c(2,4,10)]
+
+#data$`HLA.DR_neutrophils_percent`<-as.numeric(data$`HLA.DR_neutrophils_percent`)
+data[data$Disease=='Fibrosis EAA',]$Disease<-'Fibrosis'
+data<-data[data$Disease %in% c("Tumor free",  "Emphysema", "Fibrosis"),]
+data$Disease<-factor(data$Disease, levels=c("Tumor free",  "Emphysema", "Fibrosis"))
+
+data<-melt(data, id.vars=c('Disease','LuT'))
+
+# Plot graph
+ggplot(data, aes(x=variable, y=value, fill=Disease))+
+  stat_summary(fun.data=mean_se, geom="errorbar", position='dodge', width=0.9)+
+  stat_summary(fun=mean, geom="bar", position='dodge', color='black')+
+  ylab('% immune cells')+
+  xlab('')+
+  ylim(c(0,5))+
+  theme(axis.title.x=element_text(size=14,face='bold'),
+        axis.title.y=element_text(size=14,face='bold'),
+        axis.text.x=element_text(size=14,face='bold'),
+        axis.text.y=element_text(size=14,colour='black'),
+        strip.text=element_text(size=12),
+        strip.background = element_rect(fill='gray74',colour='black'),
+        legend.title=element_text(size=13,face='bold',hjust=1),
+        legend.key=element_rect(colour='black'),
+        panel.background=element_rect(fill='white'),
+        panel.border=element_rect(colour='gray40',fill=NA))
+
+# Perform statistical analysis
+
+## HLA-DR+ Neutrophils
+res.aov<-aov(value~Disease, data)
+var<-leveneTest(value~Disease, data)
+var<-var$`Pr(>F)`[1]
+resi<-shapiro.test(residuals(object=res.aov))
+resi<-resi$p.value
+if(var | resi <=0.05){
+  dunn.test(x=data$value, g=data$Disease)
+  }else{
+    print(TukeyHSD(res.aov))
+}
+
+
+## All cell types
+for (i in levels(data$variable)){
+  df<-data[data$variable==i,]
+  print(paste0('Test result for ',i))
+  
+  res.aov<-aov(value~Disease, df)
+  var<-leveneTest(value~Disease, df)
+  var<-var$`Pr(>F)`[1]
+  resi<-shapiro.test(residuals(object=res.aov))
+  resi<-resi$p.value
+  
+  if(var | resi <=0.05){
+    dunn.test(x=df$value,g=df$Disease)
+  }else{
+    print(TukeyHSD(res.aov))
+  }
+}
+
+
+## SCS2
+
+# Load data
+data<-read_xlsx('210115_flowDFG.xlsx', sheet=2)
+colnames(data)<-c('LuT','Disease','Lin_percent','B.cells_percent','T.cells_percent','CD3.CD19_percent','CD4_percent','CD8_percent','NK_percent','ILC_percent',
+                  'ILC2_percent','ILC3_percent','ILC1_percent','B.cells','T.cells','CD4','CD8','NK.cells','ILC')
+
+data<-data[,c(1,2,14:18)]
+
+data[data$Disease=='Fibrosis EAA',]$Disease<-'Fibrosis'
+data<-data[data$Disease %in% c("Tumor free",  "Emphysema", "Fibrosis"),]
+data$Disease<-factor(data$Disease, levels=c("Tumor free",  "Emphysema", "Fibrosis"))
+
+data<-melt(data, id.vars=c('Disease','LuT'))
+
+# Plot graph
+ggplot(data, aes(x=variable, y=value, fill=Disease))+
+  stat_summary(fun.data=mean_se, geom="errorbar", position='dodge', width=0.9)+
+  stat_summary(fun=mean, geom="bar", position='dodge', color='black')+
+  ylab('% immune cells')+
+  xlab('')+
+  ylim(c(0,15))+
+  theme(axis.title.x=element_text(size=14,face='bold'),
+        axis.title.y=element_text(size=14,face='bold'),
+        axis.text.x=element_text(size=14,face='bold'),
+        axis.text.y=element_text(size=14,colour='black'),
+        strip.text=element_text(size=12),
+        strip.background = element_rect(fill='gray74',colour='black'),
+        legend.title=element_text(size=13,face='bold',hjust=1),
+        legend.key=element_rect(colour='black'),
+        panel.background=element_rect(fill='white'),
+        panel.border=element_rect(colour='gray40',fill=NA))
+
+# Perform statistical analysis
+
+## All cell types
+for (i in levels(data$variable)){
+  df<-data[data$variable==i,]
+  print(paste0('Test result for ',i))
+  
+  res.aov<-aov(value~Disease, df)
+  var<-leveneTest(value~Disease, df)
+  var<-var$`Pr(>F)`[1]
+  resi<-shapiro.test(residuals(object=res.aov))
+  resi<-resi$p.value
+  
+  if(var | resi <=0.05){
+    dunn.test(x=df$value,g=df$Disease)
+  }else{
+    print(TukeyHSD(res.aov))
+  }
+}
