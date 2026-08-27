@@ -14,7 +14,6 @@ colnames(data)<-c('fcs','LuT','Tissue','Disease','Panel','Lin_percent','Granuloc
                   'Neutrophils','Eosinophils','CD14.monocytes','AMs','DCs','Mast')
 
 data<-data[,c(2,4,19:24)]
-#data<-data[,c(2,4,10)]
 
 #data$`HLA.DR_neutrophils_percent`<-as.numeric(data$`HLA.DR_neutrophils_percent`)
 data[data$Disease=='Fibrosis EAA',]$Disease<-'Fibrosis'
@@ -26,10 +25,9 @@ data<-melt(data, id.vars=c('Disease','LuT'))
 # Plot graph
 ggplot(data, aes(x=variable, y=value, fill=Disease))+
   stat_summary(fun.data=mean_se, geom="errorbar", position='dodge', width=0.9)+
-  stat_summary(fun=mean, geom="bar", position='dodge', color='black')+
+  geom_boxplot()+
   ylab('% immune cells')+
   xlab('')+
-  ylim(c(0,5))+
   theme(axis.title.x=element_text(size=14,face='bold'),
         axis.title.y=element_text(size=14,face='bold'),
         axis.text.x=element_text(size=14,face='bold'),
@@ -42,21 +40,6 @@ ggplot(data, aes(x=variable, y=value, fill=Disease))+
         panel.border=element_rect(colour='gray40',fill=NA))
 
 # Perform statistical analysis
-
-## HLA-DR+ Neutrophils
-res.aov<-aov(value~Disease, data)
-var<-leveneTest(value~Disease, data)
-var<-var$`Pr(>F)`[1]
-resi<-shapiro.test(residuals(object=res.aov))
-resi<-resi$p.value
-if(var | resi <=0.05){
-  dunn.test(x=data$value, g=data$Disease)
-  }else{
-    print(TukeyHSD(res.aov))
-}
-
-
-## All cell types
 for (i in levels(data$variable)){
   df<-data[data$variable==i,]
   print(paste0('Test result for ',i))
@@ -93,10 +76,9 @@ data<-melt(data, id.vars=c('Disease','LuT'))
 # Plot graph
 ggplot(data, aes(x=variable, y=value, fill=Disease))+
   stat_summary(fun.data=mean_se, geom="errorbar", position='dodge', width=0.9)+
-  stat_summary(fun=mean, geom="bar", position='dodge', color='black')+
+  geom_boxplot()+
   ylab('% immune cells')+
   xlab('')+
-  ylim(c(0,15))+
   theme(axis.title.x=element_text(size=14,face='bold'),
         axis.title.y=element_text(size=14,face='bold'),
         axis.text.x=element_text(size=14,face='bold'),
@@ -109,8 +91,6 @@ ggplot(data, aes(x=variable, y=value, fill=Disease))+
         panel.border=element_rect(colour='gray40',fill=NA))
 
 # Perform statistical analysis
-
-## All cell types
 for (i in levels(data$variable)){
   df<-data[data$variable==i,]
   print(paste0('Test result for ',i))
