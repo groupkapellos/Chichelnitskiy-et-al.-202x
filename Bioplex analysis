@@ -11,7 +11,7 @@ data<-read.delim('111220_Hannover_Bioplex_table.txt', header=T)
 data<-data[c(2:10,12:27,29:41,44:46,48,50:56,62,64,71,72,74,75,80,81,84),1:28]
 data[is.na(data)]<-0.01
 metadata<-read.delim('261020_Hannover_sample_table.txt', header=T)
-metadata<-metadata[metadata$disease != 'PAH',]
+metadata<-metadata[!metadata$disease %in% c('PAH', 'Tu.free','Fibrosis+Emphysema', 'Fibrosis EAA'),]
 
 common<-intersect(data$LuT, metadata$LuT)
 data<-data[data$LuT %in% common,]
@@ -76,7 +76,7 @@ pheatmap(data2,
          clustering_distance_cols='correlation',
          scale='row',
          show_rownames=T,
-         show_colnames=F,
+         show_colnames=T,
          cluster_rows=T,
          cluster_cols=F,
          cellheight=10,
