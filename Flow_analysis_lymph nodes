@@ -1,0 +1,68 @@
+# Load packages
+library(readxl)
+library(reshape2)
+library(car)
+library(reshape2)
+library(dunn.test)
+library(ggplot2)
+
+# Load data
+data<-read_xlsx('LN_flow_data.xlsx')
+
+# Process data
+data<-data[,c(1,2,7:13,18,19)]
+
+table(data$Disease)
+
+data<-melt(data, id.vars=c('LuT_ID','Disease'))
+
+# Perform statistical analysis
+results<-data.frame()
+
+groups<-unique(data$Disease)
+k<-length(groups)
+paired<-FALSE
+  
+if(k < 2){
+  print("Stop. Column of interest has fewer than 2 levels")
+}
+
+norm_p<-rep(NA, k)
+names(norm_p)<-groups
+
+for(i in unique(data$variable)){
+  
+  data2<-data[data$variable == i,]
+  
+  for (g in groups) {
+    vals<-data2[data2$Disease == g, ]
+    vals<-as.data.frame(vals)
+    
+    if (dim(vals)[1] >= 3) {
+      norm_p[g]<-shapiro.test(vals$value)$p.value
+    } else {
+      norm_p[g]<-ks.test(vals$value, "pnorm")$p.value
+    }
+  }
+  
+  normal<-all(norm_p > 0.05)
+  
+  data2$Disease<-factor(data2$Disease)
+  res.aov<-aov(value ~ Disease, data2)
+  var<-leveneTest(value ~ Disease, data2)
+  var<-var$`Pr(>F)`[1]
+  resi<-shapiro.test(residuals(object=res.aov))
+  resi<-resi$p.value
+  
+  if(var | resi <= 0.05){
+      stat_p<-dunn.test(x=data2$value, g=data2$Disease)
+      tmp<-data.frame(parameter=i, test='Kruskal-Wallis non parametric', comparison=stat_p$comparisons, p.value=stat_p$P.adjusted)
+      results<-rbind(tmp, results)}
+    else {
+      stat_p<-TukeyHSD(res.aov)
+      tmp<-data.frame(parameter=i, test='one-way ANOVA', comparison=rownames(stat_p$Disease), p.value=stat_p$Disease[,4])
+      results<-rbind(tmp, results)
+    }
+}
+
+results<-results[results$p.value <= 0.05,]
